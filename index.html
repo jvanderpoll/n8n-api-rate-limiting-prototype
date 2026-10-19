@@ -231,6 +231,7 @@ input.bad{border-color:var(--red)!important}
   <div id="lgrid"></div>
   <div style="display:flex;align-items:center;gap:10px;margin-top:20px;">
    <button class="rb" id="lresetall" style="display:none;"></button>
+   <span id="lnote" style="display:none;margin-right:auto;font-size:13px;color:var(--tx);white-space:nowrap;">With no limits set, rate limiting is disabled.</span>
    <span id="lstat" style="margin-left:auto;font-size:12px;color:var(--red);"></span>
    <button class="btn" id="lcancel" style="height:38px;padding:0 16px;">Cancel</button>
    <span id="lsaveWrap" class="r up"><button class="btn or" id="lsave" style="height:38px;padding:0 18px;">Enable limits</button></span>
@@ -354,7 +355,9 @@ function renderL(){
  $('lgrid').innerHTML=['a','e'].map(g=>'<div style="margin:0 0 14px;"><div style="display:flex;align-items:center;gap:6px;font-size:15px;margin:0 0 8px;">'+(g==='a'?'All endpoints':'Individual endpoints')+'<span class="tip" tabindex="0" data-tip="'+TIP[g]+'">'+ic('info',15)+'</span></div>'+lrow('r',g)+lrow('w',g)+'</div>').join('');
  const any=K.some(custD),b=$('lresetall');
  b.style.display=any?'inline-flex':'none';b.innerHTML=ic('reset',16)+'Reset all';
- const sw=$('lsaveWrap'),off=lmode==='enable'&&!K.some(k=>parseK(k).l!==null);
+ const sw=$('lsaveWrap'),none=!CLOUD&&!K.some(k=>parseK(k).l!==null),off=lmode==='enable'&&none;
+ $('lsave').textContent=lmode==='enable'?'Enable limits':(none?'Disable limits':'Save changes');
+ const showNote=lmode==='edit'&&none;$('lnote').style.display=showNote?'block':'none';$('lstat').style.display=showNote?'none':'';
  $('lsave').disabled=off;sw.classList.toggle('tip',off);
  if(off)sw.setAttribute('data-tip','Set at least one limit to enable rate limiting.');else sw.removeAttribute('data-tip');
 }
@@ -405,9 +408,11 @@ $('lsave').onclick=()=>{
   const el=$('lgrid').querySelector('input.bad');if(el)el.focus();
   $('lstat').textContent='Fix the highlighted fields.';return;
  }
- if(!CLOUD&&!K.some(k=>parseK(k).l!==null)){$('lstat').textContent='Set at least one limit, or turn rate limiting off.';return;}
+ const none=!CLOUD&&!K.some(k=>parseK(k).l!==null);
+ if(none&&lmode==='enable')return;
  K.forEach(k=>{const p=parseK(k);saved[k]={l:p.l,w:Number.isNaN(p.w)||p.w<1?60:p.w};});
  if(lmode==='enable')ON=true;
+ if(none&&lmode==='edit')ON=false;
  closeL();renderPol();
 };
 
