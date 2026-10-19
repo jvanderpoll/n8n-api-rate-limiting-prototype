@@ -74,12 +74,17 @@ section.rl{margin-top:44px}
 .lrt{display:flex;justify-content:space-between;align-items:center;gap:16px}
 .lrl{flex:1;min-width:0}
 .lvals{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-top:20px}
-#limSum{grid-template-columns:max-content max-content;justify-content:start;column-gap:24px;row-gap:4px;font-size:13px}
+#limSum{flex:1;grid-template-columns:1fr auto;column-gap:24px;row-gap:4px;font-size:13px}
+#limSum>span:nth-child(even){justify-self:end;text-align:right}
+#limSum>span:nth-child(odd){color:var(--tx)}
+#limSum .lb{color:var(--tx)}
 .row2{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:16px 0;border-top:1px solid var(--line2);margin-top:16px}
 .row2 + .row2{margin-top:0}
 .row2.last{padding-bottom:0}
 .pen{background:none;border:0;color:var(--tx);cursor:pointer;width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex:none}
 .pen:hover{background:var(--hov)}
+#pen{margin-right:-8.65px}
+#ich1{margin-right:-5.4px}
 .t{font-size:15px}.d{font-size:13px;color:var(--tx2)}
 .sw{width:36px;height:20px;border-radius:10px;background:var(--line);position:relative;cursor:pointer;flex:none;border:0;padding:0;display:inline-block}
 .sw.on{background:var(--green)}
@@ -370,10 +375,10 @@ function renderPol(){
  const sec=n=>n+' '+(n===1?'second':'seconds');
  const phrase=g=>{
   const r=saved['r'+g],wr=saved['w'+g];
-  if(r.l!==null&&wr.l!==null)return '<span class="vv">'+(r.w===wr.w?cnt(r.l,'read')+', '+cnt(wr.l,'write')+' / '+sec(r.w):cnt(r.l,'read')+' / '+sec(r.w)+', '+cnt(wr.l,'write')+' / '+sec(wr.w))+'</span>';
-  if(r.l!==null)return '<span class="vv">'+cnt(r.l,'read')+' / '+sec(r.w)+'</span>';
-  if(wr.l!==null)return '<span class="vv">'+cnt(wr.l,'write')+' / '+sec(wr.w)+'</span>';
-  return '<span class="lb">unlimited</span>';
+  if(r.l!==null&&wr.l!==null)return '<span class="vv">'+(r.w===wr.w?cnt(r.l,'read')+' \u00b7 '+cnt(wr.l,'write')+' / '+sec(r.w):cnt(r.l,'read')+' / '+sec(r.w)+' \u00b7 '+cnt(wr.l,'write')+' / '+sec(wr.w))+'</span>';
+  if(r.l!==null)return '<span><span class="vv">'+cnt(r.l,'read')+' / '+sec(r.w)+'</span><span class="lb"> \u00b7 unlimited writes</span></span>';
+  if(wr.l!==null)return '<span><span class="lb">unlimited reads \u00b7 </span><span class="vv">'+cnt(wr.l,'write')+' / '+sec(wr.w)+'</span></span>';
+  return '<span class="lb">unlimited reads and writes</span>';
  };
  $('limSum').innerHTML=['a','e'].map(g=>'<span class="lb">'+(g==='a'?'All endpoints':'Individual endpoints')+'<span class="tip" tabindex="0" data-tip="'+TIP[g]+'" style="margin-left:6px;vertical-align:-2px;">'+ic('info',15)+'</span></span>'+phrase(g)).join('');
  const lk='<span class="bl" id="goPol" role="link" tabindex="0">Policies</span>';
