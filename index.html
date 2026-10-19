@@ -24,6 +24,7 @@ input.bad{border-color:var(--red)}
 input[readonly]{opacity:.55}
 .btn{background:transparent;border:1px solid var(--line);color:var(--tx);height:32px;border-radius:6px;padding:0 12px;font-size:13px;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
 .btn.or{background:var(--or);border-color:var(--or);color:#fff}
+.btn:disabled{opacity:.45;cursor:not-allowed;pointer-events:none}
 .btn.gh{border-color:transparent;color:var(--tx2)}
 #wf{display:flex;flex-wrap:wrap;align-items:center;gap:10px 40px;padding:8px 16px;border-bottom:1px dashed var(--line);font-size:12px;color:var(--tx2)}
 #wf .wg{display:inline-flex;align-items:center;gap:8px}
@@ -72,6 +73,8 @@ section.rl{margin-top:44px}
 .lrw.col{display:block}
 .lrt{display:flex;justify-content:space-between;align-items:center;gap:16px}
 .lrl{flex:1;min-width:0}
+.lvals{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-top:20px}
+#limSum{grid-template-columns:max-content max-content;justify-content:start;column-gap:24px;row-gap:4px;font-size:13px}
 .row2{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:16px 0;border-top:1px solid var(--line2);margin-top:16px}
 .row2 + .row2{margin-top:0}
 .row2.last{padding-bottom:0}
@@ -128,6 +131,7 @@ section.rl{margin-top:44px}
 .msg{font-size:12px;min-height:16px;margin-top:2px}
 .hint{font-size:12px;color:var(--tx3);margin-top:4px}
 .tip{position:relative;color:var(--tx3);cursor:help;display:inline-flex}
+#lsaveWrap.tip{cursor:not-allowed}
 .tip:hover::after,.tip:focus::after{content:attr(data-tip);position:absolute;left:-4px;top:22px;width:200px;background:var(--tip);color:var(--tipt);border-radius:6px;padding:6px 9px;font-size:12px;line-height:1.4;z-index:50}
 hr{border:0;border-top:1px solid var(--line2);margin:16px 0}
 .sr{display:flex;align-items:center;gap:12px;height:36px;font-size:14px}
@@ -154,6 +158,7 @@ hr{border:0;border-top:1px solid var(--line2);margin:16px 0}
 .sfx input{padding-right:26px}
 .sfx span{position:absolute;right:10px;top:8px;font-size:12px;color:var(--tx3)}
 .tip.r:hover::after,.tip.r:focus-within::after{content:attr(data-tip);position:absolute;right:-4px;left:auto;top:24px;width:max-content;max-width:420px;white-space:pre-wrap;text-align:left;background:var(--tip);color:var(--tipt);border-radius:6px;padding:6px 9px;font-size:12px;line-height:1.4;z-index:50}
+.tip.r.up:hover::after,.tip.r.up:focus-within::after{top:auto;bottom:calc(100% + 8px)}
 input.cust{border-color:var(--tx2)}
 input.bad{border-color:var(--red)!important}
 #menu{display:none;position:fixed;z-index:60;background:var(--panel);border:1px solid var(--line);border-radius:10px;width:180px;padding:4px 0;box-shadow:0 8px 24px rgba(0,0,0,.18)}
@@ -197,8 +202,12 @@ input.bad{border-color:var(--red)!important}
     </div>
     <div class="lrw col">
      <div class="lrt">
-      <div class="lrl"><div class="t">API key rate limits</div><div class="d">Cap how many requests your <span class="lk" id="lkKeys" role="link" tabindex="0">API keys</span> can make with <span style="white-space:nowrap;"><span class="lk">rate limits</span>&nbsp;<span id="i5"></span></span></div><div class="d" id="limNote"></div></div>
-      <div class="val"><span id="limStatus" style="font-size:13px;">No limits set</span><button class="pen" id="pen" aria-label="Edit API key rate limits"></button></div>
+      <div class="lrl"><div class="t">Enable API key rate limits</div><div class="d">Cap how many requests your <span class="lk" id="lkKeys" role="link" tabindex="0">API keys</span> can make with <span style="white-space:nowrap;"><span class="lk">rate limits</span>&nbsp;<span id="i5"></span></span></div></div>
+      <span id="ewrap" class="r"><button class="sw" id="etoggle" role="switch" aria-checked="false" aria-label="Enable API key rate limits"></button></span>
+     </div>
+     <div class="lvals" id="limVals" style="display:none;">
+      <div class="vl" id="limSum"></div>
+      <button class="pen" id="pen" aria-label="Edit API key rate limits"></button>
      </div>
     </div>
    </div>
@@ -215,16 +224,16 @@ input.bad{border-color:var(--red)!important}
 <div class="layer" id="layer2">
  <div class="modal wide" id="modal2" role="dialog" aria-modal="true" aria-labelledby="ltitle">
   <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
-   <div id="ltitle" style="font-size:20px;">Set API key rate limits</div>
+   <div id="ltitle" style="font-size:20px;">Enable API key rate limits</div>
    <button id="lclose" class="dots" aria-label="Close"></button>
   </div>
-  <p style="margin:0 0 18px;font-size:14px;">Cap how many requests your API keys can make. Leave fields empty if you don't want to set a limit.</p>
+  <p style="margin:0 0 18px;font-size:14px;">Limits how many requests each API key can make. Requests over the limit get a 429 response until it resets.</p>
   <div id="lgrid"></div>
   <div style="display:flex;align-items:center;gap:10px;margin-top:20px;">
    <button class="rb" id="lresetall" style="display:none;"></button>
    <span id="lstat" style="margin-left:auto;font-size:12px;color:var(--red);"></span>
    <button class="btn" id="lcancel" style="height:38px;padding:0 16px;">Cancel</button>
-   <button class="btn or" id="lsave" style="height:38px;padding:0 18px;">Save limits</button>
+   <span id="lsaveWrap" class="r up"><button class="btn or" id="lsave" style="height:38px;padding:0 18px;">Enable limits</button></span>
   </div>
  </div>
 </div>
@@ -291,7 +300,7 @@ const DEFC={ra:1000,re:100,wa:200,we:50};
 const K=['ra','re','wa','we'];
 const cp=o=>JSON.parse(JSON.stringify(o));
 const esc=s=>s.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
-let CLOUD=false,saved={},D={};
+let CLOUD=false,ON=false,lmode='edit',saved={},D={};
 const keys=[
  {n:'exec control',m:'******0Avk',s:106,e:'24 Sep 2026',l:'25 days ago'},
  {n:'jack_api_test',m:'******GY3k',s:34,e:'21 Sep 2026',l:'24 days ago'},
@@ -307,7 +316,7 @@ const LBL={r:'Read',w:'Write'};
 const TIP={a:'Combined requests from one key to every endpoint.',e:'Counted separately for each endpoint.'};
 const def=k=>CLOUD?{l:DEFC[k],w:60}:{l:null,w:60};
 const isCust=(x,k)=>{const d=def(k);return x.l!==d.l||(x.l!==null&&x.w!==d.w);};
-const fmt=x=>x.l===null?'No limit':x.l.toLocaleString('en-US')+' / '+x.w+' s';
+const fmt=x=>x.l===null?'Unlimited':x.l.toLocaleString('en-US')+' / '+x.w+' s';
 function resetAll(o){K.forEach(k=>{o[k]=def(k);});}
 
 const raw=x=>({l:x.l===null?'':String(x.l),w:String(x.w)});
@@ -336,7 +345,7 @@ function lrow(r,g){
  const rt=c?'<span class="tip r" data-tip="Reset to default: '+fmt(d)+'"><button class="ri" data-reset="'+k+'" aria-label="Reset to default, '+fmt(d)+'">'+ic('reset',16)+'</button></span>':'<span></span>';
  const msg=ck.e?'<div class="msg" style="padding-left:64px;color:var(--red);">'+ck.e+'</div>':(w?'<div class="msg" style="padding-left:64px;color:var(--amb);">'+w+'</div>':'');
  return '<div style="margin:0 0 8px;"><div class="lr"><span style="font-size:14px;color:var(--tx2);">'+LBL[r]+'</span>'
-  +'<input type="text" inputmode="numeric" class="'+cl('l')+'" data-k="'+k+'" data-f="l" value="'+escA(x.l)+'" placeholder="No limit" aria-label="'+LBL[r]+' limit">'
+  +'<input type="text" inputmode="numeric" class="'+cl('l')+'" data-k="'+k+'" data-f="l" value="'+escA(x.l)+'" placeholder="Unlimited" aria-label="'+LBL[r]+' limit">'
   +'<span class="per">requests per</span>'
   +'<span class="sfx" style="'+(x.l.trim()===''?'opacity:.55;':'')+'"><input type="text" inputmode="numeric" class="'+cl('w')+'" data-k="'+k+'" data-f="w" value="'+escA(x.w)+'" aria-label="Window in seconds"><span>s</span></span>'
   +rt+'</div>'+msg+'</div>';
@@ -344,19 +353,40 @@ function lrow(r,g){
 function renderL(){
  $('lgrid').innerHTML=['a','e'].map(g=>'<div style="margin:0 0 14px;"><div style="display:flex;align-items:center;gap:6px;font-size:15px;margin:0 0 8px;">'+(g==='a'?'All endpoints':'Individual endpoints')+'<span class="tip" tabindex="0" data-tip="'+TIP[g]+'">'+ic('info',15)+'</span></div>'+lrow('r',g)+lrow('w',g)+'</div>').join('');
  const any=K.some(custD),b=$('lresetall');
- b.style.display=any?'inline-flex':'none';b.innerHTML=ic('reset',16)+'Reset all limits to default';
+ b.style.display=any?'inline-flex':'none';b.innerHTML=ic('reset',16)+'Reset all';
+ const sw=$('lsaveWrap'),off=lmode==='enable'&&!K.some(k=>parseK(k).l!==null);
+ $('lsave').disabled=off;sw.classList.toggle('tip',off);
+ if(off)sw.setAttribute('data-tip','Set at least one limit to enable rate limiting.');else sw.removeAttribute('data-tip');
 }
 function renderPol(){
- const n=K.filter(k=>saved[k].l!==null).length;
- $('limStatus').textContent=n?n+' limit'+(n===1?'':'s')+' set':'No limits set';
- const any=K.some(k=>isCust(saved[k],k));
- $('limNote').innerHTML=CLOUD?(any?'Customized from the cloud defaults':'Cloud defaults')+' <span class="tip" tabindex="0" data-tip="n8n Cloud keeps rate limiting on to protect the platform. You can set lower limits, but not higher ones.">'+ic('info',15)+'</span>':'';
+ const t=$('etoggle');t.classList.toggle('on',ON);t.classList.toggle('lock',CLOUD);t.setAttribute('aria-checked',ON);
+ const ew=$('ewrap');ew.classList.toggle('tip',CLOUD);
+ if(CLOUD)ew.setAttribute('data-tip','n8n Cloud keeps rate limiting on to protect the platform. You can set lower limits, but not higher ones.');else ew.removeAttribute('data-tip');
+ $('limVals').style.display=ON?'flex':'none';
+ const cnt=(n,w)=>n.toLocaleString('en-US')+' '+w+(n===1?'':'s');
+ const sec=n=>n+' '+(n===1?'second':'seconds');
+ const phrase=g=>{
+  const r=saved['r'+g],wr=saved['w'+g];
+  if(r.l!==null&&wr.l!==null)return '<span class="vv">'+(r.w===wr.w?cnt(r.l,'read')+', '+cnt(wr.l,'write')+' / '+sec(r.w):cnt(r.l,'read')+' / '+sec(r.w)+', '+cnt(wr.l,'write')+' / '+sec(wr.w))+'</span>';
+  if(r.l!==null)return '<span class="vv">'+cnt(r.l,'read')+' / '+sec(r.w)+'</span>';
+  if(wr.l!==null)return '<span class="vv">'+cnt(wr.l,'write')+' / '+sec(wr.w)+'</span>';
+  return '<span class="lb">unlimited</span>';
+ };
+ $('limSum').innerHTML=['a','e'].map(g=>'<span class="lb">'+(g==='a'?'All endpoints':'Individual endpoints')+'</span>'+phrase(g)).join('');
  const lk='<span class="bl" id="goPol" role="link" tabindex="0">Policies</span>';
  $('bnTxt').innerHTML='Configure rate limits for your API keys in '+lk+'.';
 }
-function openL(){resetDraft();K.forEach(k=>{D[k]=raw(saved[k]);});$('lstat').textContent='';renderL();$('layer2').style.display='flex';$('layer2').scrollTop=0;}
+function openL(mode){
+ lmode=mode||'edit';
+ K.forEach(k=>{D[k]=raw(saved[k]);});
+ $('ltitle').textContent=lmode==='enable'?'Enable API key rate limits':'Edit API key rate limits';
+ $('lsave').textContent=lmode==='enable'?'Enable limits':'Save changes';
+ $('lstat').textContent='';renderL();
+ $('layer2').style.display='flex';$('layer2').scrollTop=0;
+}
 function closeL(){$('layer2').style.display='none';}
-$('pen').onclick=openL;
+$('pen').onclick=()=>openL('edit');
+$('etoggle').onclick=()=>{if(CLOUD)return;if(ON){ON=false;renderPol();}else openL('enable');};
 $('lclose').onclick=closeL;$('lcancel').onclick=closeL;
 $('layer2').onclick=e=>{if(e.target===$('layer2'))closeL();};
 $('lgrid').addEventListener('click',e=>{const b=e.target.closest('[data-reset]');if(b){const k=b.dataset.reset;D[k]=raw(def(k));$('lstat').textContent='';renderL();}});
@@ -375,12 +405,14 @@ $('lsave').onclick=()=>{
   const el=$('lgrid').querySelector('input.bad');if(el)el.focus();
   $('lstat').textContent='Fix the highlighted fields.';return;
  }
+ if(!CLOUD&&!K.some(k=>parseK(k).l!==null)){$('lstat').textContent='Set at least one limit, or turn rate limiting off.';return;}
  K.forEach(k=>{const p=parseK(k);saved[k]={l:p.l,w:Number.isNaN(p.w)||p.w<1?60:p.w};});
+ if(lmode==='enable')ON=true;
  closeL();renderPol();
 };
 
 function setView(cloud){
- CLOUD=cloud;
+ CLOUD=cloud;ON=cloud;
  $('vSelf').classList.toggle('on',!cloud);$('vCloud').classList.toggle('on',cloud);
  resetAll(saved);closeL();closeC();$('menu').style.display='none';
  renderTable();
