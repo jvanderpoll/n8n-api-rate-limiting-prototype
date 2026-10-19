@@ -375,7 +375,7 @@ function renderPol(){
   if(wr.l!==null)return '<span class="vv">'+cnt(wr.l,'write')+' / '+sec(wr.w)+'</span>';
   return '<span class="lb">unlimited</span>';
  };
- $('limSum').innerHTML=['a','e'].map(g=>'<span class="lb">'+(g==='a'?'All endpoints':'Individual endpoints')+'</span>'+phrase(g)).join('');
+ $('limSum').innerHTML=['a','e'].map(g=>'<span class="lb">'+(g==='a'?'All endpoints':'Individual endpoints')+'<span class="tip" tabindex="0" data-tip="'+TIP[g]+'" style="margin-left:6px;vertical-align:-2px;">'+ic('info',15)+'</span></span>'+phrase(g)).join('');
  const lk='<span class="bl" id="goPol" role="link" tabindex="0">Policies</span>';
  $('bnTxt').innerHTML='Configure rate limits for your API keys in '+lk+'.';
 }
