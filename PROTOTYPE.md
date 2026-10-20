@@ -30,7 +30,7 @@ The prototype opens on the Policies page, on Self-hosted, with rate limiting off
 
 ## The design in one paragraph
 
-Limits are global: they apply to every API key. They live on the Policies page as one setting with a toggle. Turning it on opens a dialog that holds all four limits (reads and writes, for all endpoints and for individual endpoints). An empty field is unlimited. Once enabled, the setting shows the limits written out below it, with one edit icon that reopens the dialog. On cloud the feature is always on and the toggle is locked, so admins can only lower limits or reset them.
+Limits are global: they apply to every API key. They live on the Policies page as one setting with a toggle. Turning it on opens a dialog that holds all four limits (reads and writes, for all endpoints and for individual endpoints). An empty field means no limit. Once enabled, the setting shows the limits written out below it, with one edit icon that reopens the dialog. On cloud the feature is always on and the toggle is locked, so admins can only lower limits or reset them.
 
 ## Policies page
 
@@ -61,13 +61,13 @@ Shown only while rate limiting is on. Two lines, one per group, with the values 
 
 | What is set in the group | Text |
 | --- | --- |
-| Reads only | `100 reads / 60 seconds · unlimited writes` |
-| Writes only | `unlimited reads · 5 writes / 60 seconds` |
+| Reads only | `100 reads / 60 seconds · no limit on writes` |
+| Writes only | `no limit on reads · 5 writes / 60 seconds` |
 | Both, same window | `2 reads · 2 writes / 60 seconds` |
 | Both, different windows | `2 reads / 60 seconds · 2 writes / 120 seconds` |
-| Neither | `unlimited reads and writes` |
+| Neither | `no limit on reads or writes` |
 
-Singular forms are handled: `1 read / 1 second`. Both groups always show, so there are always two lines.
+Singular forms are handled: `1 read / 1 second`. The wording is "no limit", not "unlimited" (Jan's point): when a global limit is set, a group with no limit of its own is still capped by it, so "unlimited" would be wrong. Both groups always show, so there are always two lines.
 
 ## The dialog
 
@@ -81,11 +81,11 @@ One dialog serves both enabling and editing. It is opened with `openL('enable')`
 
 Subtitle in both modes: "Limits how many requests each API key can make. Requests over the limit get a 429 response until it resets."
 
-**Fields.** Two groups, "All endpoints" and "Individual endpoints" (each with the same info icon as the summary). Each group has two rows, Read and Write. Every row is `[limit] requests per [window] s`, and all fields are always visible. The window is whole seconds only: there is no unit dropdown. The limit placeholder is "Unlimited". The window defaults to 60 and is dimmed while its limit is empty.
+**Fields.** Two groups, "All endpoints" and "Individual endpoints" (each with the same info icon as the summary). Each group has two rows, Read and Write. Every row is `[limit] requests per [window] s`, and all fields are always visible. The window is whole seconds only: there is no unit dropdown. The limit placeholder is "No limit". The window defaults to 60 and is dimmed while its limit is empty.
 
-**Empty means unlimited.** Leaving a limit empty means no limit. Typing 0 (or 00, and so on) is accepted and turns into an empty field when you leave it. If a limit becomes empty while its window is invalid, the window resets to 60.
+**Empty means no limit.** Leaving a limit empty means that limit is not set. Typing 0 (or 00, and so on) is accepted and turns into an empty field when you leave it. If a limit becomes empty while its window is invalid, the window resets to 60.
 
-**Overrides and defaults.** A row whose value differs from its default gets a stronger border and a small reset icon at its right. Hovering the icon shows "Reset to default: X" (X is the default value, or "Unlimited"). Each row resets on its own. In self-hosted the default is unlimited. In cloud the defaults are 1,000 / 200 reads and writes for all endpoints, 100 / 50 for individual endpoints, all per 60 seconds.
+**Overrides and defaults.** A row whose value differs from its default gets a stronger border and a small reset icon at its right. Hovering the icon shows "Reset to default: X" (X is the default value, or "No limit"). Each row resets on its own. In self-hosted the default is no limit. In cloud the defaults are 1,000 / 200 reads and writes for all endpoints, 100 / 50 for individual endpoints, all per 60 seconds.
 
 **Footer**, left to right: a "Reset all" link (only visible when something differs from the defaults), a red status message, Cancel, and the primary button.
 
@@ -103,7 +103,7 @@ Errors appear as helper text under the row, after you leave the field. The inval
 
 | Rule | Message |
 | --- | --- |
-| A limit must be a whole number, 1 or more (0 and empty mean unlimited) | Enter a whole number, 1 or more. |
+| A limit must be a whole number, 1 or more (0 and empty mean no limit) | Enter a whole number, 1 or more. |
 | A window must be a whole number of seconds, 1 or more (checked only when the limit is set) | Enter a window in seconds, 1 or more. |
 | Cloud: a field cannot be emptied | Cloud limits can't be removed. Reset to restore the default. |
 | Cloud: a value cannot be looser than the default (compared by rate, so 1,000 per 120 s is stricter than 1,000 per 60 s) | Can't exceed the cloud default, 1,000 / 60 s. |
@@ -150,7 +150,7 @@ All state lives in memory. A reload restores the starting state.
 | `D` | The dialog draft, as raw strings. |
 | `DEFC` | The cloud defaults and ceiling. |
 
-Limits are keyed `ra`, `re`, `wa`, `we` (reads or writes, all or each endpoint). `saved[k]` is `{ l: number | null, w: seconds }`, where `null` means unlimited. The draft `D[k]` is `{ l: string, w: string }` so invalid input can stay visible while it is being fixed.
+Limits are keyed `ra`, `re`, `wa`, `we` (reads or writes, all or each endpoint). `saved[k]` is `{ l: number | null, w: seconds }`, where `null` means no limit. The draft `D[k]` is `{ l: string, w: string }` so invalid input can stay visible while it is being fixed.
 
 ## Code map (all in `index.html`)
 
@@ -184,7 +184,7 @@ Rule of thumb: after changing state, call `renderPol()` (or `renderTable()`, whi
 - Limits live on the Policies page, not on the API keys page.
 - Limits are global. Per-key limits are out of scope for now.
 - All four limits sit in one dialog behind one setting.
-- Empty means unlimited. A toggle turns the feature on or off, and enabling needs at least one limit.
+- Empty means no limit. A toggle turns the feature on or off, and enabling needs at least one limit.
 - Windows are in seconds only.
 - On cloud, limits can be lowered or reset but not raised or removed.
 - The setting shows its limits written out, so admins who cannot edit can read them.

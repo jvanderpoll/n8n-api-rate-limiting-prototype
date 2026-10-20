@@ -322,7 +322,7 @@ const LBL={r:'Read',w:'Write'};
 const TIP={a:'Combined requests from one key to every endpoint.',e:'Counted separately for each endpoint.'};
 const def=k=>CLOUD?{l:DEFC[k],w:60}:{l:null,w:60};
 const isCust=(x,k)=>{const d=def(k);return x.l!==d.l||(x.l!==null&&x.w!==d.w);};
-const fmt=x=>x.l===null?'Unlimited':x.l.toLocaleString('en-US')+' / '+x.w+' s';
+const fmt=x=>x.l===null?'No limit':x.l.toLocaleString('en-US')+' / '+x.w+' s';
 function resetAll(o){K.forEach(k=>{o[k]=def(k);});}
 
 const raw=x=>({l:x.l===null?'':String(x.l),w:String(x.w)});
@@ -351,7 +351,7 @@ function lrow(r,g){
  const rt=c?'<span class="tip r" data-tip="Reset to default: '+fmt(d)+'"><button class="ri" data-reset="'+k+'" aria-label="Reset to default, '+fmt(d)+'">'+ic('reset',16)+'</button></span>':'<span></span>';
  const msg=ck.e?'<div class="msg" style="padding-left:64px;color:var(--red);">'+ck.e+'</div>':(w?'<div class="msg" style="padding-left:64px;color:var(--amb);">'+w+'</div>':'');
  return '<div style="margin:0 0 8px;"><div class="lr"><span style="font-size:14px;color:var(--tx2);">'+LBL[r]+'</span>'
-  +'<input type="text" inputmode="numeric" class="'+cl('l')+'" data-k="'+k+'" data-f="l" value="'+escA(x.l)+'" placeholder="Unlimited" aria-label="'+LBL[r]+' limit">'
+  +'<input type="text" inputmode="numeric" class="'+cl('l')+'" data-k="'+k+'" data-f="l" value="'+escA(x.l)+'" placeholder="No limit" aria-label="'+LBL[r]+' limit">'
   +'<span class="per">requests per</span>'
   +'<span class="sfx" style="'+(x.l.trim()===''?'opacity:.55;':'')+'"><input type="text" inputmode="numeric" class="'+cl('w')+'" data-k="'+k+'" data-f="w" value="'+escA(x.w)+'" aria-label="Window in seconds"><span>s</span></span>'
   +rt+'</div>'+msg+'</div>';
@@ -376,9 +376,9 @@ function renderPol(){
  const phrase=g=>{
   const r=saved['r'+g],wr=saved['w'+g];
   if(r.l!==null&&wr.l!==null)return '<span class="vv">'+(r.w===wr.w?cnt(r.l,'read')+' \u00b7 '+cnt(wr.l,'write')+' / '+sec(r.w):cnt(r.l,'read')+' / '+sec(r.w)+' \u00b7 '+cnt(wr.l,'write')+' / '+sec(wr.w))+'</span>';
-  if(r.l!==null)return '<span><span class="vv">'+cnt(r.l,'read')+' / '+sec(r.w)+'</span><span class="lb"> \u00b7 unlimited writes</span></span>';
-  if(wr.l!==null)return '<span><span class="lb">unlimited reads \u00b7 </span><span class="vv">'+cnt(wr.l,'write')+' / '+sec(wr.w)+'</span></span>';
-  return '<span class="lb">unlimited reads and writes</span>';
+  if(r.l!==null)return '<span><span class="vv">'+cnt(r.l,'read')+' / '+sec(r.w)+'</span><span class="lb"> \u00b7 no limit on writes</span></span>';
+  if(wr.l!==null)return '<span><span class="lb">no limit on reads \u00b7 </span><span class="vv">'+cnt(wr.l,'write')+' / '+sec(wr.w)+'</span></span>';
+  return '<span class="lb">no limit on reads or writes</span>';
  };
  $('limSum').innerHTML=['a','e'].map(g=>'<span class="lb">'+(g==='a'?'All endpoints':'Individual endpoints')+'<span class="tip" tabindex="0" data-tip="'+TIP[g]+'" style="margin-left:6px;vertical-align:-2px;">'+ic('info',15)+'</span></span>'+phrase(g)).join('');
  const lk='<span class="bl" id="goPol" role="link" tabindex="0">Policies</span>';
